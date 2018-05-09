@@ -9,7 +9,7 @@
             img(:src="detail.showInfo.pic+'@!400'")
             .detailSKU_info_right
                 text {{'￥'+salePriceCent}}
-                text {{'库存：'+detail.showInfo.quantityLeft+'件'}}
+                text {{quantityLeft}}
                 view.detailSKU_balel
                     view(v-for='(item,index) in detail.showInfo.attributeList',:key='index') {{item.value}}
         .specifications
@@ -20,7 +20,7 @@
                 img(src='/static/assets/order_setting_subtract_normal_icon@3x.png',@click='computedCount(-1)')
                 text {{count}}
                 img(src='/static/assets/order_setting_add_unclickale_icon@3x.png',@click='computedCount(1)')
-        .confirm(@click='confirm') {{'确定'}}
+        .confirm(@click='confirm',:class="{invilid:cantClick}") {{'确定'}}
 </template>
 
 <script>
@@ -53,7 +53,7 @@ export default {
   },
   data(){
       return{
-        count:1
+        count:1,
       }
   },
   computed:{
@@ -69,6 +69,20 @@ export default {
               return true
           }else if(this.isPintuan=='centDraw'){
               return false
+          }
+      },
+      cantClick(){
+          if(this.detail.showInfo.quantityLeft>0){
+              return false
+          }else{
+              return true
+          }
+      },
+      quantityLeft(){
+          if(this.detail.showInfo.quantityLeft>99){
+              return '库存充足'
+          }else{
+              return '库存紧张'
           }
       }
   },
@@ -89,21 +103,24 @@ export default {
         }
     },
     confirm(){
-        this.changeDetailSkuStatus(false)
-        // console.log(this.detail.showInfo)
-        // this.detail.showInfo 为当前选中的sku
-        this.changePreOorderParameter({
-            'itemList':[
-                {
-                    'skuId':this.detail.showInfo.id,
-                    'buyNum':this.count
-                }
-            ],
-            'orderType':this.orderType,
-        })
-         wx.navigateTo({
-            url: '/pages/order/preorder'
-        })
+        if(this.detail.showInfo.quantityLeft>0){
+             this.changeDetailSkuStatus(false)
+            // console.log(this.detail.showInfo)
+            // this.detail.showInfo 为当前选中的sku
+            this.changePreOorderParameter({
+                'itemList':[
+                    {
+                        'skuId':this.detail.showInfo.id,
+                        'buyNum':this.count
+                    }
+                ],
+                'orderType':this.orderType,
+            })
+            wx.navigateTo({
+                url: '/pages/order/preorder'
+            })
+        }
+       
     },
     
   },
@@ -128,6 +145,7 @@ export default {
     z-index: 10;
     display: flex;
     flex-direction: column;
+    overflow: auto;
     .detailSKU_top{
         flex: 1;
     }
@@ -234,6 +252,9 @@ export default {
             font-size: 18px;
             text-align: center;
             line-height: 48px;
+        }
+        .invilid{
+            background: #666 !important;
         }
     }
 }

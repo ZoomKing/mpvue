@@ -10,6 +10,6 @@ app.$mount()
 export default {
   config: {
     navigationBarTitleText: '商品详情',
-    enablePullDownRefresh: true
+    // enablePullDownRefresh: true
   }
 }

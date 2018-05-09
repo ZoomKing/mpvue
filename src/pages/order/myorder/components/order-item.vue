@@ -33,7 +33,7 @@ a.order_item(:href='aHref')
 </template>
 
 <script>
-import { mapState, mapActions } from 'vuex'
+import { mapState,mapMutations} from 'vuex';
 import {formatTime2,refreshPage}  from '@/utils'
 import goodsItem from './goods-item'
 import global from '@/global'
@@ -41,7 +41,8 @@ import api from '../api'
 export default {
   data(){
       return {
-         time:'00:00:00'
+         time:'00:00:00',
+         retryCount:3
       }
   },
   props:{
@@ -72,6 +73,9 @@ export default {
   onReachBottom () {
   },
   methods: {
+      ...mapMutations([  
+       'changePaySuccessInfo'
+    ]),
     cancel(orderId){
         // console.log(orderId)
         orderId = orderId + '';
@@ -149,10 +153,11 @@ export default {
         'package': wechatPay.pkg,
         'signType': 'MD5',
         'paySign': wechatPay.sign,
-        'success':function(res){
-             wx.navigateTo({
-                url: '/pages/order/paySuccess'
-            })
+        'success':(res)=>{
+             this.getPayResult({'payId':global.payId})
+            //  wx.navigateTo({
+            //     url: '/pages/order/paySuccess'
+            // })
         },
         'fail':function(res){
         //   console.log(res)
@@ -162,7 +167,31 @@ export default {
         },
         'complete':function(res){}
       })
-    }
+    },
+    async getPayResult(obj){
+        const res = await api.pay_result(obj);
+        console.log(this.retryCount)
+        if(this.retryCount<=0){
+            wx.switchTab({
+                url: '/pages/order/myorder'
+            });
+            return;
+        }
+        // console.log(res.value.paySuccess);
+        if(res.value.paySuccess){
+            // wx.hideLoading();
+            this.changePaySuccessInfo(res.value);
+            wx.redirectTo({
+                url: '/pages/order/paySuccess'
+            })
+        }else{
+            var that = this;
+            this.retryCount--;
+            setTimeout(()=>{
+                that.getPayResult({'payId':global.payId});
+            },1000)
+        }
+    },
   },
   components:{
       goodsItem
@@ -197,6 +226,7 @@ export default {
         display: flex;
         justify-content: flex-end;
         border-bottom: 1px solid #f4f4f4;
+        align-items: center;
         text:nth-child(1){
             font-size: 12px;
         }

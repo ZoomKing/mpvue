@@ -5,7 +5,8 @@ const api = {
   cancel_order:(orderId)=>fly.request($api+'smart/orders/cancel?orderId='+orderId,null,{method:'POST'}),
   pre_payment:(obj)=>fly.request($api+'smart/orders/pre_payment',obj,{method:'POST'}),
   order_pay:(obj)=>fly.request($api+'smart/orders/pay',obj,{method:'POST'}),
-  confirm_receipt:(orderId)=>fly.request($api+'smart/orders/confirm?orderId='+orderId,null,{method:'POST'})
+  confirm_receipt:(orderId)=>fly.request($api+'smart/orders/confirm?orderId='+orderId,null,{method:'POST'}),
+  pay_result:(obj)=>fly.request($api+'smart/orders/pay_result',obj,{method:'GET'}),
 }
 
 export default api 

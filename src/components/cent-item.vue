@@ -1,6 +1,6 @@
 <template lang="pug">
 a.home_view_li(:href='detailHref')
-    img.home_view_li_left(:src="imgUrlPrefix+dataInfo.pic+'@!400'")
+    img.home_view_li_left(:src="imgUrlPrefix+dataInfo.pic+'@!400'",lazy-load='true')
     .home_view_li_right
         .li_top {{dataInfo.title}}
         .li_center {{'原价¥'+originalPriceCent}}

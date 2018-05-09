@@ -42,7 +42,12 @@ export default {
   },
   computed:{
       salePriceCent(){
-          return (this.basicInfo.salePriceCent/100).toFixed(2)
+          if(this.basicInfo.itemType==4){
+              return (this.pintuanInfo.pintuanPriceCent/100).toFixed(2)
+          }else{
+              return (this.basicInfo.salePriceCent/100).toFixed(2)
+          }
+          
       },
       originalPriceCent(){
           return (this.basicInfo.originalPriceCent/100).toFixed(2)
@@ -159,6 +164,7 @@ export default {
         font-size: 11px;
         // line-height: 44px;
         align-items: center;
+        justify-content: space-between;
         color: @lightColor;
         >view{
             padding-right: 20px;

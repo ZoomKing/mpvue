@@ -3,8 +3,8 @@
     view {{'赶快告诉好友拼团吧!'}}
     view.share_btn
     view.active_state_detail_btn
+        view(id='view',@click='backToHome') {{'回到首页'}}
         button(open-type="share") {{'邀请好友'}}
-        view(@click='backToHome') {{'回到首页'}}
 
 </template>
 
@@ -72,7 +72,7 @@ export default {
         width: 260px;
         justify-content: center;
         justify-content: space-around;
-        >button,>view{
+        >button,>.view{
             font-size: 14px;
             width: 100px;
             height: 40px;
@@ -85,8 +85,8 @@ export default {
             color: white;
             background: @bgColor;
         }
-        view{
-             color: @bgColor;
+        #view{
+            color: @bgColor;
             background: white;
             border:1px solid @bgColor;
         }

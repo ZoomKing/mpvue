@@ -5,10 +5,10 @@
         input(placeholder='请点击输入',v-model='addressName')
     .address-item
         .address-item-name {{'手机号码'}}
-        input(placeholder='请点击输入',v-model='addressPhoneNumber',max-length='11')
+        input(placeholder='请点击输入',v-model='addressPhoneNumber',maxlength='11')
     .address-item
         picker(mode="region",@change="bindRegionChange",value='region')
-            view.picker {{region[0]+','+region[1]+','+region[2]}}
+            view.picker {{region[0]+region[1]+region[2]}}
         img(src='/static/assets/usercenter_more_orders_arrow_16@3x.png')
     .address-detailed
         .address-item
@@ -54,7 +54,17 @@ export default {
   },
   methods: {
     bindRegionChange: function (e) {
-        this.region = e.target.value
+        if(e.target.value.indexOf('null')!=-1){
+            wx.showToast({
+                title: '添加区域地址失败，请重新选择',
+                icon: 'none',
+                duration: 2000
+            })
+            return;
+        }else{
+            this.region = e.target.value;
+        }
+        
     },
     changeDefaultAddress(){
         this.addressIsDefault = !this.addressIsDefault;
@@ -91,7 +101,7 @@ export default {
             })
             return;
         }
-        if(this.addressDetailAddress=''){
+        if(this.addressDetailAddress.replace(/(^\s*)|(\s*$)/g, "")==''){
             wx.showToast({
                 title: '请输入详细地址',
                 icon: 'none',
@@ -99,13 +109,17 @@ export default {
             })
             return;
         }
-        console.log(this.addressInfo);
+        // console.log(this.addressInfo);
         this.addNewAddress(this.addressInfo);
        
     },
     async addNewAddress(obj){
         const res = await api.add_new_address(obj);
         if(res.succ){
+            this.addressName = '';
+            this.addressPhoneNumber = '';
+            this.addressDetailAddress = '';
+            this.addressIsDefault = '';
             wx.redirectTo({
                 url: '/pages/order/address'
             })
@@ -130,6 +144,9 @@ export default {
         justify-content: space-between;
         font-size: 14px;
         align-items: center;
+        .address-item-name{
+            width: 100px;
+        }
         picker{
             width: 100%;
         }

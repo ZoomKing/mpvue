@@ -9,7 +9,7 @@ const api = {
   getCurrentDraw:()=>fly.get($api+'smart/draw/current_draw',null),
   get_query:(positionId)=>fly.get($api+'smart/ads/query',{
     'positionId':positionId,
-    'pageSize':1,
+    'pageSize':10,
     'currentPage':1
 })
 }

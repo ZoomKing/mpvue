@@ -63,7 +63,10 @@ export default {
     display: flex;
     flex-wrap: wrap;
     font-size: 12px;
-    
+    min-height:50px;
+    max-height:150px;
+    overflow:scroll;
+
   }
 }
 </style>

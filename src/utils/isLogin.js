@@ -3,53 +3,36 @@ import global from '@/global'
 let currentUrlValue;
 function isLogin(currentUrl){
     currentUrlValue = currentUrl?currentUrl:'';
-    wx.getStorage({
-        key: 'storage_token',
-        complete:(res)=>{
-            if(res.data){
-                // console.log(res.data)
-                if(currentUrlValue){
-                    // currentUrlValue()
-                    wx.reLaunch({
-                        url:currentUrlValue
-                    })
+    
+    //获取token失败，默认未登录，先去login（传code即可）;
+        // console.log()
+        wx.login({
+            success: (res)=>{
+                if (res.code) {
+                    login(res.code); 
+                } else {
+                    console.log('登录失败！' + res.errMsg)
                 }
-            }else{
-                //获取token失败，默认未登录，先去login（传code即可）;
-                // console.log(res.data)
-                 wx.login({
-                    success: (res)=>{
-                        console.log(res)
-                        if (res.code) {
-                            login(res.code); 
-                        } else {
-                            console.log('登录失败！' + res.errMsg)
-                        }
-                    }
-                });
-                
             }
-        }
-    })
+        });
+                
 }
 async function login(code){
-    console.log(code)
-    // var formData = new FormData();
-    // formData.append('code','code');
     let loginInfo = await commonApi.login({code:code});
-    console.log(loginInfo);
     //这里判断login的情况，若是失败则重新login，这次加上getuserInfo的加密信息
+    // console.log(loginInfo.succ)
     if(loginInfo.succ){
         if(loginInfo.value.binding){
             try {
                 wx.setStorageSync('storage_token', loginInfo.value.token);
                 if(currentUrlValue){
                     // currentUrlValue();
-                    console.log(currentUrlValue)
+                    // console.log(currentUrlValue)
                     wx.reLaunch({
-                        url:currentUrlValue
+                        url:currentUrlValue,
                     })
                 }
+                
             } catch (e) {    
             }
             
@@ -59,14 +42,14 @@ async function login(code){
         }
         // isLogin(funcValue)
     }else{
-        console.log(loginInfo)
         if(loginInfo.errorCode.code=='1118'){
-            console.log('hello')
             wx.login({
                 success:(res)=>{
+                    // console.log(res)
                     if(res.code){
                         wx.getUserInfo({
                             success: function(data) {
+                                // console.log(data)
                                 loginAgain({
                                     'code':res.code,
                                     'encryptedData':data.encryptedData,
@@ -81,9 +64,10 @@ async function login(code){
     }
 };
 async function loginAgain(obj){
+    // console.log(obj);
     let loginInfo_again = await commonApi.login(obj);
     // console.log(loginInfo_again);
-    saveSmartId(loginInfo.value.smartId);
+    saveSmartId(loginInfo_again.value.smartId);
 }
 
 //存储smartId

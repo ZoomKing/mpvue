@@ -3,9 +3,9 @@
     view {{'赶快告诉好友拼团吧!'}}
     view.share_btn
     view.active_state_detail_btn
-        view(@click='backToMyorder') {{'我的订单'}}
         view(@click='backToHome') {{'回到首页'}}
-
+        view(@click='backToMyorder') {{'我的订单'}}
+       
 </template>
 
 <script>
@@ -86,11 +86,11 @@ export default {
             line-height: 40px;
             margin: 0;
         }
-        view:nth-child(1){
+        view:nth-child(2){
             color: white;
             background: @bgColor;
         }
-        view:nth-child(2){
+        view:nth-child(1){
              color: @bgColor;
             background: white;
             border:1px solid @bgColor;

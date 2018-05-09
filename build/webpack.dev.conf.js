@@ -5,7 +5,7 @@ var merge = require('webpack-merge')
 var baseWebpackConfig = require('./webpack.base.conf')
 // var HtmlWebpackPlugin = require('html-webpack-plugin')
 var FriendlyErrorsPlugin = require('friendly-errors-webpack-plugin')
-
+// const UglifyJsPlugin = require('uglifyjs-webpack-plugin')
 // copy from ./webpack.prod.conf.js
 var path = require('path')
 var ExtractTextPlugin = require('extract-text-webpack-plugin')
@@ -44,6 +44,13 @@ module.exports = merge(baseWebpackConfig, {
       // filename: utils.assetsPath('css/[name].[contenthash].css')
       filename: utils.assetsPath('css/[name].wxss')
     }),
+    // new webpack.optimize.UglifyJsPlugin({
+    //   compress:{
+    //     warnings: false,
+    //     // drop_debugger: true,
+    //     // drop_console: true
+    //   }
+    // }),
     // Compress extracted CSS. We are using this plugin so that possible
     // duplicated CSS from different components can be deduped.
     new OptimizeCSSPlugin({

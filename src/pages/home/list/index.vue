@@ -1,10 +1,10 @@
 <template lang="pug">
 .container
-  img.home_banner(:src='adQueryImg',mode='widthFix')
+  img.home_banner(v-for='(item,index) in adQueryImg',:key='index',:src='item',mode='widthFix',:lazyLoad='lazy')
   .home_view_ul
     homeItem(
       v-for='(item,index) in pintuanData',
-      :item = 'item',
+      :item = 'item',true
       :key='index',:dataInfo='item')
 </template>
 
@@ -22,7 +22,8 @@ export default {
       currentPage:1,
       isCurrentPage:1,
       pageCount:1,
-      adQueryImg:'',
+      adQueryImg:[],
+      lazy:true
     }
   },
   components: {
@@ -35,12 +36,18 @@ export default {
   },
   onShow(){
     //禁止分享
-    wx.hideShareMenu();
-     this.getPintuanList(this.currentPage);
-    this.getQuery(13);
+    // wx.hideShareMenu();
+    // this.pintuanData = [];
+    // this.currentPage = 1;
+    // this.isCurrentPage = 1;
+    // this.pageCount = 1;
+    //  this.getPintuanList(this.currentPage);
+    // this.getQuery(13);
+    this.adQueryImg =[];
   },
   mounted () {
-   
+    this.getPintuanList(this.currentPage);
+    this.getQuery(13);
   },
   onReachBottom () {
     if(this.currentPage==this.isCurrentPage && this.currentPage<=this.pageCount){
@@ -62,8 +69,11 @@ export default {
     //广告位
     async getQuery(positionId){
       const res = await api.get_query(positionId);
-      let wip = JSON.parse(res.value.values[0].data);
-      this.adQueryImg = global.imgUrlPrefix+ wip.img +'@!1200'
+      // let wip = JSON.parse(res.value.values[0].data);
+      res.value.values.forEach((item,index)=>{
+        let wipImg = JSON.parse(item.data).img;
+          this.adQueryImg.push(global.imgUrlPrefix+wipImg+"@!1200")
+      })
     }
 
   }

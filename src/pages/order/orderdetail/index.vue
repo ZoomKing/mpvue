@@ -4,7 +4,7 @@
         view {{detail.orderStatusDesc}}
         view(v-if='timeStatus')
             text {{'结束倒计时'}}
-            text {{timeContext}} 
+            text {{timeContext}}
     //-通知消息
     noticeInfo(:dataInfo='detail.logistics',v-if='detail.logistics')
     //- 地址信息
@@ -72,7 +72,8 @@ export default {
       timeStatus: false,
       shareShow: false,
       tuanInfo: null,
-      orderStatus: 1
+      orderStatus: 1,
+      retryCount:3
     };
   },
   computed: {
@@ -87,11 +88,24 @@ export default {
   onShow() {
     //禁止分享
     wx.hideShareMenu();
+    //重置付款回调次数
+    this.retryCount = 3;
+    this.tuanInfo = null;
     this.getDetail(this.$root.$mp.query.id);
   },
   mounted() {
     setInterval(() => {
-      this.timeContext = formatTime2(this.detail.payExpireTime);
+      if(this.detail.orderStatus==6){
+          let wip = '';
+          if(this.detail.centDrawInfo){
+              this.timeContext = formatTime2(this.detail.centDrawInfo.endTime);
+          }else if(this.detail.pintuanInfo){
+              this.timeContext = formatTime2(this.detail.pintuanInfo.endTime);
+          }
+      }else if(this.detail.orderStatus==1){
+           this.timeContext = formatTime2(this.detail.payExpireTime);
+      }
+      // console.log(this.timeContext)
       if (this.timeContext.indexOf("-") != -1) {
         this.timeStatus = false;
       }
@@ -100,7 +114,7 @@ export default {
 
   onReachBottom() {},
   methods: {
-    ...mapMutations(["changeToast"]),
+    ...mapMutations(["changeToast",'changePaySuccessInfo']),
     async getDetail(orderId) {
       //   console.log(orderId);
       const res = await api.get_order_detail(orderId);
@@ -112,8 +126,8 @@ export default {
       } else if (res.value.centDrawInfo) {
         this.tuanInfo = res.value.centDrawInfo;
       }
-      //判断是不是待支付状态，显示倒计时
-      if (res.value.orderStatus == 1) {
+      //判断是不是待支付状态，或者是待分享状态，显示倒计时
+      if (res.value.orderStatus == 1 ||res.value.orderStatus == 6) {
         this.timeStatus = true;
       }
     },
@@ -186,10 +200,11 @@ export default {
         package: wechatPay.pkg,
         signType: "MD5",
         paySign: wechatPay.sign,
-        success: function(res) {
-          wx.navigateTo({
-            url: "/pages/order/paySuccess"
-          });
+        success: (res)=> {
+           this.getPayResult({'payId':global.payId})
+          // wx.navigateTo({
+          //   url: "/pages/order/paySuccess"
+          // });
         },
         fail: function(res) {
           //   console.log(res)
@@ -199,7 +214,31 @@ export default {
         },
         complete: function(res) {}
       });
-    }
+    },
+     async getPayResult(obj){
+        const res = await api.pay_result(obj);
+        console.log(this.retryCount)
+        if(this.retryCount<=0){
+            wx.switchTab({
+                url: '/pages/order/myorder'
+            });
+            return;
+        }
+        // console.log(res.value.paySuccess);
+        if(res.value.paySuccess){
+            // wx.hideLoading();
+            this.changePaySuccessInfo(res.value);
+            wx.redirectTo({
+                url: '/pages/order/paySuccess'
+            })
+        }else{
+            var that = this;
+            this.retryCount--;
+            setTimeout(()=>{
+                that.getPayResult({'payId':global.payId});
+            },1000)
+        }
+    },
   },
   onShareAppMessage(res) {
     //   console.log(this.detail.orderType)

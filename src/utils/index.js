@@ -77,7 +77,7 @@ export function refreshPage(state){
       })
     }
     
-  }, 500);
+  }, 300);
 }
 //判断手机号
 export function checkMobile(str) {

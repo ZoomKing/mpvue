@@ -1,12 +1,12 @@
 <template lang="pug">
 a.home_view_li(:href='detailHref')
-    img.home_view_li_left(:src="imgUrlPrefix+dataInfo.pic+'@!400'")
+    img.home_view_li_left(:src="imgUrlPrefix+dataInfo.pic+'@!400'",)
     .home_view_li_right
         .li_top {{dataInfo.title}}
         .li_center {{dataInfo.desc}}
         .li_bottom
             .li_bottom_left
-                text.li_bottom_left_saleprice {{'¥'+salePriceCent}}
+                text.li_bottom_left_saleprice {{'¥'+pintuanPriceCent}}
                 text.li_bottom_left_orginprice {{'¥'+originalPriceCent}}
             .li_bottom_right {{'去开团'}}
 </template>
@@ -14,6 +14,10 @@ a.home_view_li(:href='detailHref')
 <script>
 import  global from '@/global'
 export default {
+  data(){
+      return {
+      }
+  },
   props: {
     dataInfo: {
       type: Object,
@@ -24,8 +28,8 @@ export default {
       originalPriceCent(){
           return (this.dataInfo.originalPriceCent/100).toFixed(2);
       },
-      salePriceCent(){
-          return (this.dataInfo.salePriceCent/100).toFixed(2);
+      pintuanPriceCent(){
+          return (this.dataInfo.pintuanPriceCent/100).toFixed(2);
       },
       detailHref(){
           return `/pages/home/detail?id=${this.dataInfo.itemId}`

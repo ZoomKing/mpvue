@@ -37,7 +37,7 @@ export default {
     type:{
       type:Object,
       default:1
-    }
+    },
   },
   computed:{
     ...mapState(["detail"]),
@@ -61,6 +61,7 @@ export default {
     },
     toGroup(){
       // console.log(this.type);
+      this.$emit('listenFromChild','1');
       this.changeParticipatePintuan(false)
       this.changeDetailSkuStatus(true);
       if(this.type==4){
@@ -83,7 +84,8 @@ export default {
       setInterval(()=>{
           this.time = formatTime(this.detailInfo.endTime)
       },100)
-    }
+    },
+    
   },
   mounted(){
        this.getTuanDetail(this.detail.groupItemId);  

@@ -6,14 +6,6 @@ import isLogin from './isLogin'
 const fly = new Fly()
 
 let token = '';
-wx.getStorage({
-  key: 'storage_token',
-  success: function(res) {
-      token = res.data;
-  },
-  fail:(res)=>{
-  }
-})
 const func ={
   async getSalt(){
     let a = await commonApi.getSalt()
@@ -27,6 +19,11 @@ if(!global.requestHeaderInfo.salt){
 
 
 fly.interceptors.request.use((request) => {
+  try {
+    token = wx.getStorageSync('storage_token');
+ } catch (e) {
+   // Do something when catch error
+ }
   wx.showNavigationBarLoading();
   wx.showLoading({
     title: '加载中',
@@ -35,19 +32,6 @@ fly.interceptors.request.use((request) => {
   request.headers['x-device-id'] = global.requestHeaderInfo.deviceID;
   let sign;
   
-  // (()=>{
-    
-  //   try {
-  //     var value = wx.getStorageSync('key')
-  //     if (value) {
-  //         // Do something with return value
-  //     }
-  //   } catch (e) {
-  //     // Do something when catch error
-  //   }
-
-  // })();
-  // console.log('token='+token)
   if(token){
     request.headers['x-access-token'] = token;
     let versionStr = 'x-proto-version:v1;x-device-id:'+global.requestHeaderInfo.deviceID+';';
@@ -64,6 +48,8 @@ fly.interceptors.request.use((request) => {
 
 fly.interceptors.response.use(
   (response, promise) => {
+    //请求成功了，重置小程序刷新当前页面的次数
+    global.reFreshSmartCount = 5;
     // console.log(response)
     //当token快过期的时候，后端会在头部放入一个新的token,用来替换掉之前的token
     if( response.headers['x-refresh-token']){
@@ -133,9 +119,17 @@ fly.interceptors.response.use(
         url = url+'?'+parameter
       }
       // console.log(url)
-      wx.reLaunch({
-        url: url
-      })
+      if(global.reFreshSmartCount>0){
+        global.reFreshSmartCount--;
+        wx.reLaunch({
+          url: url
+        })
+      }else{
+        wx.showToast({
+          title: '系统累瘫了,工程师抢救中,请重启小程序试试~',
+          icon: 'none'
+        })
+      }
     }
     if(err.status>=500){
       wx.showToast({

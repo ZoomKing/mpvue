@@ -27,7 +27,6 @@ export default {
   methods: {
     changeMemo(){
         this.$emit('listenFromChild',this.memo);
-        this.memo = ''
     }  
   },
   computed:{

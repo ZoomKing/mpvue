@@ -38,20 +38,27 @@ export default {
             'payFeeCent':'',
             'groupList':[],
             'invoice':{},
-            'receiver':{},
+            'receiver':null,
             'orderType':1,
             // tuanId 新开团的时候不要传，参团的时候需要传
         },
         memo:'',
-        action:''
+        action:'',
+        retryCount:3
     }
   },
   onShow(){
+    //重置付款次数
+    this.retryCount = 3;
     //禁止分享
     wx.hideShareMenu()
     // console.log(this.preorder.pre_order_parameter)
     // console.log(this.preorder.create_pintuanId)
+    // 重置导入地址时的状态
+    this.changeImportAddressState(false);
+    //获取地址列表
     this.getAddress();
+    // 获取预下单信息
     this.getPreOrder(this.preorder.pre_order_parameter);
     //这里不建议使用computed去处理，在数据未发生变化时，优先读取缓存。
     //computed 计算属性只有在相关的数据发生变化时才会改变要计算的属性，当相关数据没有变化是，它会读取缓存。
@@ -99,7 +106,7 @@ export default {
   },
   methods: {
     ...mapMutations([  
-        'changeShowAddress','changePaySuccessInfo'
+        'changeShowAddress','changePaySuccessInfo','changeImportAddressState'
     ]),
     listenFromChild(msg){
         this.memo = msg;
@@ -131,23 +138,36 @@ export default {
               }
           ],
           'invoice':this.preorder.invoiceInfo,
-          'receiver':{
-               "receiverName": this.preorder.showAddress.name,
-               "receiverPhone": this.preorder.showAddress.phone,
-               "receiverAddress": this.preorder.showAddress.region+' '+this.preorder.showAddress.address
-          },
           'orderType':this.preorder.pre_order_parameter.orderType,
           'useCoupon':false
       }
+      //判断地址是否存在
+      if(this.preorder.showAddress.phone){
+          this.creat_parameter.receiver ={
+                "receiverName": this.preorder.showAddress.name,
+               "receiverPhone": this.preorder.showAddress.phone,
+               "receiverAddress": this.preorder.showAddress.region+' '+this.preorder.showAddress.address
+          }
+      }else{
+        wx.showToast({
+            title: '您还没有添加地址哦~',
+            icon: 'none'
+        })
+        return;
+      }
+    //是拼团商品
       if(this.preorder.create_pintuanId){
           this.creat_parameter.tuanId = this.preorder.create_pintuanId;
       }
       // console.log(this.creat_parameter);
+      
       this.creatOrderFunc(this.creat_parameter);
     },
     async creatOrderFunc(obj){
         let res = await api.create_order(obj);
-        
+        if(res.succ){
+            this.creat_parameter = {}
+        }
         this.prePayment({'orderIds':res.value.orderIds});
     },
     async prePayment(obj){
@@ -189,15 +209,23 @@ export default {
     },
     async getPayResult(obj){
             const res = await api.pay_result(obj);
+            console.log(this.retryCount)
+            if(this.retryCount<=0){
+                wx.switchTab({
+                    url: '/pages/order/myorder'
+                });
+                return;
+            }
             // console.log(res.value.paySuccess);
-            this.changePaySuccessInfo(res.value);
             if(res.value.paySuccess){
                 // wx.hideLoading();
+                this.changePaySuccessInfo(res.value);
                  wx.redirectTo({
                     url: '/pages/order/paySuccess'
                 })
             }else{
               var that = this;
+              this.retryCount--;
                setTimeout(()=>{
                     that.getPayResult({'payId':global.payId});
                 },1000)
