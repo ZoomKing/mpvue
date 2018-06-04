@@ -2,7 +2,7 @@
 .pintuanContainer
     .viewMorePintuan
       text {{dataInfo.desc}}
-      view(@click='changeMorPintuan(true)')
+      view(@click='changeMorPintuan(true)',v-if='dataInfo.values.length>3')
         text {{'更多拼团'}}
         text {{'>'}}
     .pintuanList

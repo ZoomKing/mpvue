@@ -7,7 +7,9 @@ a.home_view_li(:href='detailHref')
         .li_bottom
             .li_bottom_left
                 text.li_bottom_left_saleprice {{'¥'+pintuanPriceCent}}
-                text.li_bottom_left_orginprice {{'¥'+originalPriceCent}}
+                view
+                    text {{'原价'}}
+                    text.li_bottom_left_orginprice {{'¥'+originalPriceCent}}
             .li_bottom_right {{'去开团'}}
 </template>
 
@@ -57,13 +59,15 @@ export default {
         width: 140px;
         height: 140px;
         object-fit: cover;
+        flex:none;
     }
     .home_view_li_right{
         flex:1;
         display: flex;
-        padding: 10px 10px 0;
+        padding: 10px 10px 5px;
         flex-wrap: wrap;
         flex-direction: column;
+        justify-content: space-between;
         .li_top{
             display: -webkit-box;
             -webkit-box-orient: vertical;
@@ -73,11 +77,14 @@ export default {
             font-size: 14px;
             line-height: 20px;
             height: 40px;
+            width: 100%;
+            word-wrap: break-word;
+            word-break:break-all;
         }
         .li_center {
-            color: @normalFontColor;
-            font-size: 11px;
-            margin: 10px 0 20px;
+            color: @bgColor;
+            font-size: 14px;
+            margin: 5px 0 20px;
         }
         .li_bottom{
             height: 30px;
@@ -87,10 +94,16 @@ export default {
             .li_bottom_left{
                 display: flex;
                 flex-direction: column;
-                margin-top: -5px;
+                margin-top: -2px;
                 .li_bottom_left_saleprice{
+                    font-weight:bolder;
                     font-size: 18px;
                     color: @bgColor;
+                    line-height:20px;
+                }
+                >view{
+                    font-size: 10px;
+                    color: @lightColor;
                 }
                 .li_bottom_left_orginprice{
                     font-size: 10px;

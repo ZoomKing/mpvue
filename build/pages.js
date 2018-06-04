@@ -11,4 +11,6 @@ module.exports = [
   'pages/home/shareDetail',
   'pages/home/login',
   'pages/cent/list',
+  'pages/home/webView',
+  'pages/order/invoiceList'
 ]

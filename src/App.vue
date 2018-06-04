@@ -9,28 +9,34 @@ export default {
     return {
     }
   },
-  onLaunch(){
+  
+  onShow(){
     func.getSalt();
-    wx.getSystemInfo({
-      success(res){
-        global.requestHeaderInfo = {
-            deviceID:res.brand+res.model
-        }
-      }
-    })
+    
   },
   
 }
 const func ={
   async getSalt(){
     let a = await commonApi.getSalt();
-    global.requestHeaderInfo.salt = a.value;
+    // global.requestHeaderInfo.salt = a.value;
+    wx.getSystemInfo({
+      success(res){
+        global.requestHeaderInfo = {
+            deviceID:res.brand+res.model,
+            salt:a.value
+        }
+      }
+    })
     func.get_config();
+    
   },
   async get_config(){ 
      const res = await commonApi.getConfig();
       global.imgUrlPrefix = res.value.imgUrlPrefix+'/';
       global.serviceTel = res.value.serviceTel;
+      global.centDrawOnline = res.value.centDrawOnline;
+      
   }
 }
 </script>

@@ -37,26 +37,35 @@ async function login(code){
             }
             
         }else{
+            global.loginBackUrl = currentUrlValue;
             //已经存了openId，未绑定手机号，去绑定
             saveSmartId(loginInfo.value.smartId);
         }
         // isLogin(funcValue)
     }else{
         if(loginInfo.errorCode.code=='1118'){
-            wx.login({
-                success:(res)=>{
-                    // console.log(res)
-                    if(res.code){
-                        wx.getUserInfo({
-                            success: function(data) {
-                                // console.log(data)
-                                loginAgain({
-                                    'code':res.code,
-                                    'encryptedData':data.encryptedData,
-                                    'iv':data.iv
-                                });
+            global.loginBackUrl = currentUrlValue;
+            
+            wx.getUserInfo({
+                complete:(res)=>{
+                    // 判断用户有没有授过权，有的话，直接请求login接口，没有则跳到授权绑定页
+                    if(res.userInfo){
+                        // console.log(res)
+                        wx.login({
+                            success: e => {
+                                if (e.code) {
+                                    loginAgain({
+                                        code: e.code,
+                                        encryptedData: res.encryptedData,
+                                        iv: res.iv
+                                    });
+                                }
                             }
-                          })
+                        });
+                    }else{
+                        wx.reLaunch({
+                            url: '/pages/home/login'
+                        })
                     }
                 }
             })
@@ -67,14 +76,30 @@ async function loginAgain(obj){
     // console.log(obj);
     let loginInfo_again = await commonApi.login(obj);
     // console.log(loginInfo_again);
-    saveSmartId(loginInfo_again.value.smartId);
+    if(loginInfo_again.succ){
+        if(loginInfo_again.value.binding){
+            //设置登录token
+            wx.setStorage({
+              key: "storage_token",
+              data: loginInfo_again.value.token
+            });
+            // wx.reLaunch({
+            //     url: '/pages/home/list'
+            // })
+            wx.reLaunch({
+              url: global.loginBackUrl
+            });
+        }else{
+            saveSmartId(loginInfo_again.value.smartId);
+        }
+    }
 }
 
 //存储smartId
 function saveSmartId(smartId){
+    global.smartId = smartId;
     wx.reLaunch({
         url: '/pages/home/login'
     })
-    global.smartId = smartId;
 }
 export default isLogin;

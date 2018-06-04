@@ -360,7 +360,7 @@ export default {
     justify-content: flex-end;
     align-items: center;
     button {
-      width: 80px;
+      // width: 80px;
       height: 25px;
       text-align: center;
       line-height: 25px;
@@ -408,6 +408,9 @@ export default {
         font-size: 24px;
       }
     }
+  }
+  button{
+    background:white;
   }
 }
 </style>

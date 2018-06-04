@@ -1,18 +1,16 @@
 <template lang="pug">
 .active_state_detail
-    paySuccessPinCan(v-if='successInfo.tuanDetail&&successInfo.tuanDetail.status==3',:dataInfo='successInfo.tuanDetail')
-    paySuccessPinKai(v-else-if='successInfo.tuanDetail',:dataInfo='successInfo.tuanDetail')
-    paySuccessCentCan(v-else-if='successInfo.centDrawDetail&&successInfo.centDrawDetail.status==3',:dataInfo='successInfo.centDrawDetail')
-    paySuccessCentKai(v-else-if='successInfo.centDrawDetail',:dataInfo='successInfo.centDrawDetail')
+    paySuccessOver(v-if='successInfo.tuanDetail&&successInfo.tuanDetail.status==3',:dataInfo='successInfo.tuanDetail')
+    paySuccessProcess(v-else-if='successInfo.tuanDetail',:dataInfo='successInfo.tuanDetail',:status='1')
+    paySuccessOver(v-else-if='successInfo.centDrawDetail&&successInfo.centDrawDetail.status==3',:dataInfo='successInfo.centDrawDetail')
+    paySuccessProcess(v-else-if='successInfo.centDrawDetail',:dataInfo='successInfo.centDrawDetail',:status='2')
     paySuccessSingle(v-else)
 </template>
 
 <script>
 import { mapState,mapMutations} from 'vuex';
-import paySuccessPinKai from './components/paySuccess-pin-kai'
-import paySuccessPinCan from './components/paySuccess-pin-can'
-import paySuccessCentKai from './components/paySuccess-cent-kai'
-import paySuccessCentCan from './components/paySuccess-cent-can'
+import paySuccessProcess from './components/paySuccess-process'
+import paySuccessOver from './components/paySuccess-over'
 import paySuccessSingle from './components/paySuccess-single'
 import global from '@/global'
 import {schemesUrl} from '@/utils'
@@ -67,7 +65,7 @@ export default {
     //    this.getPayResult({'payId':global.payId})
    },
    components: {
-       paySuccessPinKai,paySuccessPinCan,paySuccessCentKai,paySuccessCentCan,paySuccessSingle
+       paySuccessProcess,paySuccessOver,paySuccessSingle
    },
    onShareAppMessage: function (res) {
        let info;

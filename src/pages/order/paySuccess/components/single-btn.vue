@@ -1,6 +1,6 @@
 <template lang="pug">
 .paySuccess_share
-    view {{'赶快告诉好友拼团吧!'}}
+    view {{'赶快告诉好友来品库吧!'}}
     view.share_btn
     view.active_state_detail_btn
         view(@click='backToHome') {{'回到首页'}}
@@ -55,7 +55,7 @@ export default {
         display: flex;
         width: 260px;
         justify-content: space-between;
-        padding: 30px 0;
+        padding: 15px 0;
         >view{
             width: 48px;
             height: 48px;
@@ -79,7 +79,7 @@ export default {
         justify-content: space-around;
         >view{
             font-size: 14px;
-            width: 100px;
+            width: 120px;
             height: 40px;
             border-radius: 20px;
             text-align: center;

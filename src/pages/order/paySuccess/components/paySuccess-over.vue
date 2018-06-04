@@ -3,7 +3,7 @@
     .paySuccess_cent
         img(src='/static/assets/payment_succeed_pic_110@3x.png')
         view {{'拼团成功'}}
-    shareBtn
+    shareBtn(:state='"over"')
 </template>
 
 <script>

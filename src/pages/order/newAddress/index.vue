@@ -53,16 +53,26 @@ export default {
     
   },
   methods: {
+    ...mapMutations([  
+        'changeShowAddress',
+    ]),
     bindRegionChange: function (e) {
-        if(e.target.value.indexOf('null')!=-1){
+        let isTrue = true;
+        
+        e.target.value.forEach((item,index)=>{
+            if(!item){
+                isTrue = false
+            }
+        })
+        if(isTrue){
+            this.region = e.target.value;
+        }else{
             wx.showToast({
-                title: '添加区域地址失败，请重新选择',
+                title: '选择区域地址失败，请重新选择',
                 icon: 'none',
                 duration: 2000
             })
             return;
-        }else{
-            this.region = e.target.value;
         }
         
     },
@@ -116,12 +126,13 @@ export default {
     async addNewAddress(obj){
         const res = await api.add_new_address(obj);
         if(res.succ){
+            this.changeShowAddress(obj);
             this.addressName = '';
             this.addressPhoneNumber = '';
             this.addressDetailAddress = '';
             this.addressIsDefault = '';
             wx.redirectTo({
-                url: '/pages/order/address'
+                url: '/pages/order/preorder'
             })
         }
     }
@@ -138,6 +149,7 @@ export default {
     .address-item{
         display: flex;
         width: 335px;
+        position: relative;
         margin: 0 auto;
         border-bottom: 1px solid #f4f4f4;
         height: 54px;
@@ -149,11 +161,15 @@ export default {
         }
         picker{
             width: 100%;
+            line-height: 54px;
         }
         input{
             text-align: right;
         }
         >img{
+            position: absolute;
+            right: 0px;
+            top: 17px;
             width: 20px;
             height: 20px;
         }

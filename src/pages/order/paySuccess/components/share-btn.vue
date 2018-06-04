@@ -1,6 +1,13 @@
 <template lang="pug">
 .paySuccess_share
-    view {{'赶快告诉好友拼团吧!'}}
+    view(v-if="state=='process'")
+        view(v-if='status==1') {{'拼团成功即可立即发货，'}}
+        view(v-else) {{'拼团成功才有资格参与抽奖，'}}
+        view
+            text {{'快去'}}
+            text {{'分享'}}
+            text {{'到微信群或好友！'}}
+    view(v-else) {{'赶快告诉好友拼团吧!'}}
     view.share_btn
     view.active_state_detail_btn
         view(id='view',@click='backToHome') {{'回到首页'}}
@@ -14,9 +21,13 @@ import { mapState, mapActions } from 'vuex'
 import global from '@/global'
 export default {
     props:{
-        dataInfo:{
-            type:Object,
-            default:{}
+        state:{
+            type:String,
+            default:"process"
+        },
+        status:{
+            type:Number,
+            default:1
         }
     },
     computed:{
@@ -45,12 +56,19 @@ export default {
     >view:nth-child(1){
         padding-top: 30px;
         line-height: 20px;
+        text-align: center;
+        >view{
+            >text:nth-child(2){
+                color: @bgColor;
+            }
+        }
+
     }
     .share_btn{
         display: flex;
         width: 260px;
         justify-content: space-between;
-        padding: 30px 0;
+        padding: 15px 0;
         >view{
             width: 48px;
             height: 48px;
@@ -74,7 +92,7 @@ export default {
         justify-content: space-around;
         >button,>.view{
             font-size: 14px;
-            width: 100px;
+            width: 120px;
             height: 40px;
             border-radius: 20px;
             text-align: center;

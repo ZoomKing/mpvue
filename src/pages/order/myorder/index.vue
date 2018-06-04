@@ -15,6 +15,7 @@ import orderItem from './components/order-item'
 import isLogin from '@/utils/isLogin'
 import commonApi from '@/utils/commonApi'
 import global from '@/global'
+import { setTabBar } from '@/utils'
 import api from './api'
 export default {
   data(){
@@ -68,6 +69,7 @@ export default {
       };
     this.changeOrderList([]);
     this.getOrderList(this.state);
+    // setTabBar();
   },
   methods:{
     ...mapMutations(['changeOrderList']),

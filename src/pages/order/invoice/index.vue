@@ -3,42 +3,38 @@
     .invoice_choose
         text {{'发票类型'}}
         view
-            img(:src="change_type_state?'/static/assets/payment_check_common_icon@3x.png':'/static/assets/payment_uncheck_common_icon@3x.png'",@click='changeType(true)')
-            text {{'不开发票'}}
-        view
-            img(:src="change_type_state?'/static/assets/payment_uncheck_common_icon@3x.png':'/static/assets/payment_check_common_icon@3x.png'",@click='changeType(false)')
             text {{'电子发票'}}
-    .invoice_type(v-if='!change_type_state')
+    .invoice_type
         text {{'抬头类型'}}
-        view
-            img(:src="change_title_type_state?'/static/assets/order_setting_radio_on_common_icon@3x.png':'/static/assets/order_setting_radio_off_common_icon@3x.png'",@click='changeTitleType(true)')
+        view(@click='changeTitleType(true)')
+            img(:src="change_title_type_state?'/static/assets/order_setting_radio_on_common_icon@3x.png':'/static/assets/order_setting_radio_off_common_icon@3x.png'",)
             text {{'个人'}}
-        view
-            img(:src="change_title_type_state?'/static/assets/order_setting_radio_off_common_icon@3x.png':'/static/assets/order_setting_radio_on_common_icon@3x.png'",@click='changeTitleType(false)')
+        view(@click='changeTitleType(false)')
+            img(:src="change_title_type_state?'/static/assets/order_setting_radio_off_common_icon@3x.png':'/static/assets/order_setting_radio_on_common_icon@3x.png'",)
             text {{'企业'}}
-    .invoice_content_company(v-if='!change_type_state')
+    .invoice_content_company
         view
             text {{'发票抬头'}}
             input(placeholder='请输入发票抬头',v-model='title')
         view(v-if='!change_title_type_state')
             text {{'纳税识别号'}}
-            input(placeholder='请输入纳税识别号',v-model='taxId')
+            input(placeholder='请输入纳税识别号',v-model='taxId',maxlength='18')
         view
             text {{'收票人邮箱'}}
-            input(placeholder='请输入收件人邮箱',v-model='email')
+            input(placeholder='请输入邮箱(非必须)',v-model='email')
     view.invoice_btn
-      #get_invoice_fromwx(@click='get_invoice_fromwx',v-if='!change_title_type_state') {{'从微信导入'}}
       #save_invoice(@click='save_invoice') {{'保存'}}
 
 </template>
 
 <script>
 import { mapState,mapMutations} from 'vuex';
+import api from './api'
 export default {
   data(){
       return{
         //需不需要开发票 change_type_state == true 不需要 
-        change_type_state:true,
+        change_type_state:false,
         // 发票类型 change_title_type_state == true 个人 change_title_type_state==false 单位
         change_title_type_state:true,
         invoiceInfo:{},
@@ -61,36 +57,10 @@ export default {
   },
   methods: {
     ...mapMutations(['changeInvoice']),
-    changeType(value){
-        this.change_type_state = value;
-    },
     changeTitleType(value){
       this.change_title_type_state = value;
     },
-    get_invoice_fromwx(){
-      let that = this;
-      wx.chooseInvoiceTitle({
-        success(res) {
-          wx.showToast({
-            title: '导入发票成功',
-            icon: 'none'
-          })
-          // console.log(this);
-          that.title = res.title;
-          that.taxId = res.taxNumber;
-        },
-        fail(res){
-             wx.showToast({
-              title: '导入发票失败,请手动添加',
-              icon: 'none'
-            })
-        }
-      })
-    },
     save_invoice(){
-      if(this.change_type_state){
-          this.invoiceInfo.type=1;
-      }else{
         this.invoiceInfo.type= 2;
         this.invoiceInfo.title = this.title;
          if(this.title.replace(/(^\s*)|(\s*$)/g, "")==''){
@@ -116,21 +86,34 @@ export default {
           }
         }
         this.invoiceInfo.email = this.email;
-        if(this.email.replace(/(^\s*)|(\s*$)/g, "")==''){
-              wx.showToast({
-                title: '请填写收件人邮箱',
-                icon: 'none',
-                duration: 2000
-              })
-              return;
-          }
+        //email 非必填项
+        // if(this.email.replace(/(^\s*)|(\s*$)/g, "")==''){
+        //       wx.showToast({
+        //         title: '请填写收件人邮箱',
+        //         icon: 'none',
+        //         duration: 2000
+        //       })
+        //       return;
+        // }
+      
+        console.log(this.invoiceInfo);
+        this.add_invoice(this.invoiceInfo)
+       
+    },
+    async add_invoice(obj){
+      let wipRes = await api.add_invoice(obj);
+      console.log(wipRes);
+      if(wipRes.succ){
+          this.changeInvoice(this.invoiceInfo);
+          //清空之前填写的发票信息
+          this.title = '';
+          this.taxId = '';
+          this.email = '';
+          wx.navigateBack({
+                // url: '/pages/order/preorder'
+                delta:2
+          })
       }
-      // console.log(this.invoiceInfo);
-      this.changeInvoice(this.invoiceInfo);
-      wx.navigateBack({
-            // url: '/pages/order/preorder'
-            delta:1
-      })
     }
   },
   components:{

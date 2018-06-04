@@ -27,6 +27,7 @@ fly.interceptors.request.use((request) => {
   wx.showNavigationBarLoading();
   wx.showLoading({
     title: '加载中',
+    mask:true
   })
   request.headers['x-proto-version'] = 'v1';
   request.headers['x-device-id'] = global.requestHeaderInfo.deviceID;
@@ -63,10 +64,13 @@ fly.interceptors.response.use(
     if(response.data.succ){
       return promise.resolve(response.data)
     }else{
-      wx.showToast({
-        title: response.data.errorCode.message,
-        icon: 'none'
-      })
+      if(response.data.errorCode.code !='1118'){
+        wx.showToast({
+          title: response.data.errorCode.message,
+          icon: 'none'
+        })
+      }
+     
       return promise.resolve(response.data)
     }
    
@@ -102,6 +106,12 @@ fly.interceptors.response.use(
     if(err.status==0){
       wx.showToast({
         title: '可能没有网络了哦~',
+        icon: 'none'
+      })
+    }
+    if(err.status==400){
+      wx.showToast({
+        title: '请求无效，请重启小程序后再次尝试~',
         icon: 'none'
       })
     }

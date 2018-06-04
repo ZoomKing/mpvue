@@ -5,7 +5,7 @@
     view.detail_price
         text {{'¥'+salePriceCent}}
         text {{'￥'+originalPriceCent}}
-        text(v-if='basicInfo.itemType==4') {{'已拼'+pintuanInfo.soldNum+'件'}}
+        text(v-if='basicInfo.itemType==4') {{}}
         text(v-if='basicInfo.itemType==4') {{pintuanInfo.quota+'人团'}}
     view.detail_discount_list
         view.easy_payment(v-if='basicInfo.bestPayPromotionTitle')
@@ -86,6 +86,8 @@ export default {
         -webkit-box-orient: vertical;
         -webkit-line-clamp: 2;
         overflow: hidden;
+        word-wrap: break-word;
+        word-break:break-all;
     }
     .detail_price{
         margin-top: 5px;

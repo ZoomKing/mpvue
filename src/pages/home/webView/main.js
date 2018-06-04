@@ -10,7 +10,7 @@ app.$mount()
 
 export default {
   config: {
-    navigationBarTitleText: '发票信息',
-    enablePullDownRefresh: false
+    navigationBarTitleText: '品库特卖',
+    enablePullDownRefresh: true
   }
 }

@@ -3,9 +3,14 @@ a.home_view_li(:href='detailHref')
     img.home_view_li_left(:src="imgUrlPrefix+dataInfo.pic+'@!400'",lazy-load='true')
     .home_view_li_right
         .li_top {{dataInfo.title}}
-        .li_center {{'原价¥'+originalPriceCent}}
+        .li_center 
+            text {{'￥0.01'}}
+            view
+                text {{'原价'}}
+                text {{'¥'+originalPriceCent}}
         .li_bottom
-            .li_bottom_right {{'立享一分抽'}}
+            .li_bottom_left {{dataInfo.desc}}
+            .li_bottom_right {{'立享1分抽'}}
 </template>
 
 <script>
@@ -64,6 +69,7 @@ export default {
         width: 140px;
         height: 140px;
         object-fit: cover;
+        flex: none;
     }
     .home_view_li_right{
         flex:1;
@@ -84,40 +90,48 @@ export default {
         }
         .li_center {
             color: @normalFontColor;
-            font-size: 16px;
-            margin: 10px 0 20px;
-            text:nth-child(2),text:nth-child(4){
-                color: @bgColor;
+            font-size: 12px;
+            // margin: 10px 0 20px;
+            display: flex;
+            color: @bgColor;
+            flex-direction: column;
+            >text:nth-child(1){
+                font-size:18px;
+                font-weight:bolder;
+                line-height:20px;
+            }
+            text:nth-child(2){
+                color: #b2b2b2;
+                text-decoration: line-through;
+            }
+            >view{
+                font-size:12px;
+                color: #b2b2b2;
             }
         }
         .li_bottom{
             height: 30px;
             display: flex;
             width: 100%;
+            margin-bottom: 5px;
             justify-content: space-between;
+            text-align: center;
+            line-height: 30px;
+            font-size: 14px;
             .li_bottom_left{
-                display: flex;
-                flex-direction: column;
-                margin-top: -5px;
-                .li_bottom_left_saleprice{
-                    font-size: 18px;
-                    color: @bgColor;
-                }
-                .li_bottom_left_orginprice{
-                    font-size: 10px;
-                    text-decoration: line-through;
-                    color: @lightColor;
-                }
+                flex:1;
+                color: @bgColor;
+                background: white;
+                border: 1px solid @bgColor;
+                border-top-left-radius: 5px;
+                border-bottom-left-radius: 5px;
             }
             .li_bottom_right{
-                width: 186px;
-                height: 30px;
-                font-size: 16px;
-                text-align: center;
-                line-height: 30px;
+                flex:1;
                 background: @bgColor;
                 color: white;
-                border-radius: 5px;
+                border-top-right-radius: 5px;
+                border-bottom-right-radius: 5px;
             }
         }
 

@@ -17,7 +17,7 @@ a.order_item(:href='aHref')
         view
             img(src='/static/assets/usercenter_customer_service_icon_common@3x.png')
             text {{'联系客服'}}
-        view(@click.stop='confirmReceipt(dataInfo.orderId)') {{'确认收获'}}
+        view(@click.stop='confirmReceipt(dataInfo.orderId)') {{'确认收货'}}
     .goods_deal(v-else-if='dataInfo.orderStatus==1')
         .goods_deal_top
             view
@@ -295,7 +295,7 @@ export default {
                     height: 25px;
                     border-radius: 25px;
                     text-align: center;
-                    line-height: 25px;
+                    line-height: 26px;
                 }
                 >view:nth-child(1){
                     color: #FF9DB4;

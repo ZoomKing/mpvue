@@ -32,6 +32,7 @@ export default {
         'changeShowAddress',
       ]),
       setAddress(){
+        
         this.changeShowAddress(this.dataInfo)
           wx.navigateBack({
             // url: '/pages/order/preorder'

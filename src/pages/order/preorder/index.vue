@@ -5,9 +5,11 @@
       //- 商品信息
       goodsInfo(v-for='(item,index) in pre_order_info.normalList',:key='index',:dataInfo='item',@listenFromChild="listenFromChild",:memo='memo')
       //- 发票
-      a.invoice(:href='aHref')
-          view.invoice_name {{'发票'}}
-          view.invoice_choose
+      view.invoice()
+          view.invoice_name(@click='chooseInvoice')
+            img(:src='invoiceChooseImg')
+            text {{'我要开发票'}}
+          a.invoice_choose(v-if='invoiceInfo.type==2',:href='aHref')
               text {{invoiceText}}
               img(src='/static/assets/arrow_right_16_icon.png')
       //- 总金额
@@ -18,14 +20,14 @@
           view {{'¥'+sumTotalFeeCent}}
           view#submit_btn(@click='createOrder') {{submit_btn_text}}
     .preorder_bottom
-    importAddress(v-if='preorder.importAddressState')
+    //- importAddress(v-if='preorder.importAddressState')
 </template>
 
 <script>
 import { mapState,mapMutations} from 'vuex';
 import goodsInfo from './components/goods-info'
 import addressContent from './components/show-address'
-import importAddress from './components/import-address'
+// import importAddress from './components/import-address'
 import global from '@/global'
 import api from './api'
 export default {
@@ -44,7 +46,9 @@ export default {
         },
         memo:'',
         action:'',
-        retryCount:3
+        retryCount:3,
+        invoiceInfo:{},
+        invoiceChooseImg:'/static/assets/correct_uncheck_icon_20@3x.png'
     }
   },
   onShow(){
@@ -55,7 +59,7 @@ export default {
     // console.log(this.preorder.pre_order_parameter)
     // console.log(this.preorder.create_pintuanId)
     // 重置导入地址时的状态
-    this.changeImportAddressState(false);
+    // this.changeImportAddressState(false);
     //获取地址列表
     this.getAddress();
     // 获取预下单信息
@@ -64,18 +68,31 @@ export default {
     //computed 计算属性只有在相关的数据发生变化时才会改变要计算的属性，当相关数据没有变化是，它会读取缓存。
     //而不必想 motheds方法 和 watch 方法是的每次都去执行函数。
     //由于会有缓存值的情况，所以第一次可以改变状态，第二次则因为缓存的情况不会执行computed,故而不采用.
-    if(this.preorder.invoiceInfo.type == 1){
+    this.invoiceInfo = this.preorder.invoiceInfo;
+    if(this.invoiceInfo.type == 1){
         this.invoiceText =  '不开发票'
-    }else if(this.preorder.invoiceInfo.titleType==1){
-        this.invoiceText =  '个人发票'
-    }else if(this.preorder.invoiceInfo.titleType==2){
-        this.invoiceText =  '企业发票'
+        this.invoiceChooseImg = `/static/assets/correct_uncheck_icon_20@3x.png`
+    }else if(this.invoiceInfo.titleType==1){
+        this.invoiceText =  this.invoiceInfo.title
+        this.invoiceChooseImg =  `/static/assets/correct_check_icon_20@3x.png`
+    }else if(this.invoiceInfo.titleType==2){
+        this.invoiceText =  this.invoiceInfo.title
+        this.invoiceChooseImg =  `/static/assets/correct_check_icon_20@3x.png`
+    }
+    console.log(this.invoiceInfo);
+    //若是去列表页没有选择发票，发票type应该修正为1
+    if(this.invoiceInfo.title){
+        this.invoiceInfo.type = 2;
+         this.invoiceChooseImg =  `/static/assets/correct_check_icon_20@3x.png`
+    }else{
+         this.invoiceInfo.type = 1;
+         this.invoiceChooseImg = `/static/assets/correct_uncheck_icon_20@3x.png`
     }
   },
   computed: {
       ...mapState(["preorder",'common']),
       aHref(){
-        return `/pages/order/invoice`
+        return `/pages/order/invoiceList`
       },
       sumTotalFeeCent(){
           return parseFloat(this.pre_order_info.sumTotalFeeCent/100).toFixed(2)
@@ -95,7 +112,7 @@ export default {
             return '提交订单'
             break;
         }
-      }
+      },
   },
   mounted () {
   
@@ -106,10 +123,34 @@ export default {
   },
   methods: {
     ...mapMutations([  
-        'changeShowAddress','changePaySuccessInfo','changeImportAddressState'
+        'changeShowAddress','changePaySuccessInfo','changeInvoice'
     ]),
     listenFromChild(msg){
         this.memo = msg;
+    },
+    chooseInvoice(){
+       
+        if(this.invoiceInfo.type==1){
+            //第一次勾选选择发票的时候应该是没有title的，利用title去判断是不是第一次勾选title，之后选择发票后只会修改type
+            if(!this.invoiceInfo.title){
+                wx.navigateTo({
+                    url: '/pages/order/invoiceList'
+                })
+            }
+            this.invoiceInfo.type = 2;
+            this.invoiceChooseImg =  `/static/assets/correct_check_icon_20@3x.png`
+            if(this.invoiceInfo.titleType==1){
+                this.invoiceText =  '个人发票'
+            }else if(this.invoiceInfo.titleType==2){
+                this.invoiceText =  '企业发票'
+            }else{
+                this.invoiceText =  '请选择发票'
+            }
+        }else{
+            this.invoiceInfo.type=1;
+            this.invoiceChooseImg = `/static/assets/correct_uncheck_icon_20@3x.png`
+            
+        }
     },
     async getAddress(){
       //判断若是vuex的showAddress没有值，则用默认的值，若有值，则用showAddress
@@ -214,7 +255,6 @@ export default {
                 wx.switchTab({
                     url: '/pages/order/myorder'
                 });
-                return;
             }
             // console.log(res.value.paySuccess);
             if(res.value.paySuccess){
@@ -233,7 +273,7 @@ export default {
        },
   },
   components:{
-    goodsInfo,addressContent,importAddress
+    goodsInfo,addressContent
   }
 }
 </script>
@@ -253,7 +293,14 @@ export default {
   line-height: 44px;
   border-bottom: 10px solid #f7f8fa;
   .invoice_name{
-    width: 30px;
+    width: 100px;
+    display: flex;
+    align-items: center;
+    img{
+        width: 18px;
+        height: 18px;
+        margin-right: 5px;
+    }
   }
   .invoice_choose{
     flex:1;

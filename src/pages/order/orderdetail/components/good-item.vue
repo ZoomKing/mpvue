@@ -10,7 +10,7 @@
                 text {{'￥'+payFeeCent}}
                 text {{'X'+dataInfo.buyNum}}
     //- view.goods_operation
-    //-     .refund(v-if='false',class='refund') {{'申请退款'}}
+    //-     .refund(v-if='true',class='refund') {{'申请退款'}}
     //-     .cant_refund(v-else,class='not_refund') {{'商品不可退'}}
 </template>
 

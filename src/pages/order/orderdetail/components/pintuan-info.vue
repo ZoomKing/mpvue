@@ -109,7 +109,6 @@ export default {
             }
         }
         .pintuan_info_users_right{
-            width: 76px;
             height: 25px;
             color: white;
             background: @bgColor;

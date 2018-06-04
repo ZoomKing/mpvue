@@ -46,15 +46,20 @@
                 //- img(src='https://img-daily.pinkumall.com/a8f163c6_825d_4c39_b702_f1815ad11400.jpeg@!400')
                 view(v-if='item.role==1') {{'团长'}}
             view(v-for='(item,index) in tuan_detail.leftQuota',:key='index') {{'?'}}
- 
+    //- 商品规则
+    rule(:dataInfo='ruleText',v-if='ruleText')
   //- 底部
-  .detailFooter(v-if='baseDetailInfo&&baseDetailInfo.pintuanInfo&&!can_tuan_id')
+  .detailFooter(v-if='baseDetailInfo&&baseDetailInfo.pintuanInfo&&(statusInfo.code==1)&&!can_tuan_id')
     view.singleBuy(@click='statusInfo.canBuy&&callSku("singleBuy")',:class="{invilid:cantClick}")
       text {{'¥'+normalPriceCent}}
       text {{'单独购买'}}
     view.pintuanBuy(@click='statusInfo.canBuy&&callSku("pintuanBuy")',:class="{invilid:cantClick}")
       text {{'¥'+pintuanPriceCentShow}}
       text {{'发起拼团'}}
+  .detailFooter(v-else-if='baseDetailInfo&&baseDetailInfo.pintuanInfo&&(statusInfo.code==-2)&&!can_tuan_id')
+    view.centDraw(@click='statusInfo.canBuy&&callSku("pintuanBuy")',:class="{invilid:cantClick}")
+      //-  拼团
+      text {{btnContent}}
   .detailFooter(v-else-if='baseDetailInfo&&baseDetailInfo.centDrawInfo&&!can_tuan_id')
     view.centDraw(@click='statusInfo.canBuy&&callSku("centDraw")',:class="{invilid:cantClick}")
       //- text {{'¥0.01 一分抽'}}
@@ -97,6 +102,7 @@ import detailSku from './components/detail-sku'
 import detailboxBottom from './components/detail-session'
 import rule from './components/rule'
 import global from '@/global'
+import {formatTime4} from '@/utils'
 export default {
   components: {
     dataInfo,pintuanContainer,goodsDetail,participatePintuan,morePintuan,detailSku,detailboxBottom,rule,pintuanNullUser
@@ -144,7 +150,8 @@ export default {
         statusInfo:{
            addToCart:true,
            canBuy:true
-        }
+        },
+        tuanEndTimer:null,
     }
   },
   computed: {
@@ -189,16 +196,19 @@ export default {
     //清除团信息
     this.tuan_detail = null;
     this.ruleText = null;
+    //团过期时间定时器状态
+    this.tuanEndTimer = null;
     // showPintuanStatus 由于存在一分抽，故目前分为3种状态。1 存在拼团信息，展示拼团列表，2 拼团，暂无人员拼团 3 一分抽，什么都不显示
     this.showPintuanStatus = 3;
-    // this.$root.$mp.query.id = 140;
-    // this.$root.$mp.query.tuan_id = 135;
+    // this.$root.$mp.query.id = 8;
+    // this.$root.$mp.query.tuan_id = 736;
     this.can_tuan_id = this.$root.$mp.query.tuan_id;
     this.getGoodsDetail(this.$root.$mp.query.id);
     // this.getSkuList({'itemId':this.$root.$mp.query.id,'channel':0});
   },
   mounted () {
-    console.log(this.detail)
+    // console.log(this.$root.$mp.query.tuan_id)
+    // console.log(this.$root.$mp.query.id)
   },
   onUnload () {
   },
@@ -261,10 +271,12 @@ export default {
           this.itemType = 4;
            this.type = 4;
           this.orderType = 4;
-          this.getPintuanList(this.$root.$mp.query.id);
+          
           //若是带tuanid进来，获取团详情
           if(this.$root.$mp.query.tuan_id){
             this.getTuanDetail(this.$root.$mp.query.tuan_id);
+          }else{
+            this.getPintuanList(this.$root.$mp.query.id);
           }
           this.num = this.baseDetailInfo.pintuanInfo.soldNum;
           this.pintuanPriceCentShow = parseFloat(this.baseDetailInfo.pintuanInfo.pintuanPriceCent/100).toFixed(2);
@@ -354,6 +366,16 @@ export default {
       const wipData = await api.get_tuan_detail(id);
       // console.log(wipData);
       this.tuan_detail = wipData.value;
+      if(formatTime4(wipData.value.endTime)<0){
+           this.Invalid = true;
+      }
+      this.tuanEndTimer = setInterval(()=>{
+          let endTime  = formatTime4(wipData.value.endTime);
+          if(endTime<0){
+              this.Invalid = true;
+              clearInterval(this.tuanEndTimer)
+          }
+      },1000)
       if(wipData.value.leftQuota==0){
         this.isTuanFull = true;
       }
@@ -362,6 +384,20 @@ export default {
       const wipData = await api.get_cent_detail(id);
       // console.log(wipData);
       this.tuan_detail = wipData.value;
+      if(formatTime4(wipData.value.endTime)<0){
+           this.Invalid = true;
+      }
+      this.tuanEndTimer = setInterval(()=>{
+          let endTime  = formatTime4(wipData.value.endTime);
+          if(endTime<0){
+              this.Invalid = true;
+              clearInterval(this.tuanEndTimer)
+          }
+      },1000)
+      if(wipData.value.leftQuota==0){
+        this.isTuanFull = true;
+      }
+
       if(wipData.value.leftQuota==0){
         this.isTuanFull = true;
       }
@@ -380,6 +416,9 @@ export default {
       imageUrl:global.imgUrlPrefix+this.shareInfo.picUrl+'@!800',
       path: path
     }
+  },
+  onUnload(){
+    clearInterval(this.tuanEndTimer)
   },
   destroyed () {
      
@@ -445,11 +484,15 @@ export default {
     background: @bgColor;
   }
   .invalid{
-    line-height: 49px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: orange;
   }
   .fullTuan{
-    line-height: 49px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: @normalFontColor;
   }
 }
@@ -536,7 +579,7 @@ export default {
             display: flex;
             flex-wrap: wrap;
             padding: 0px 0 20px;
-            justify-content: flex-start;
+            justify-content: center;
             >view{
                 width: 44px;
                 height: 44px;

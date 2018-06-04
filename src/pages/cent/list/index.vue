@@ -1,6 +1,6 @@
 <template lang="pug">
 .container
-  img.home_banner(v-for='(item,index) in adQueryImg',:key='index', :src='item',mode='widthFix')
+  img.home_banner(v-for='(item,index) in adQueryImg',:key='index', :src='item.img',mode='widthFix',@tap='checkScheme(item.link)')
   .time
       text {{'距离结束'}}
       text.active {{timeArr[0]}}
@@ -16,6 +16,7 @@
       v-for='(item,index) in centListData',
       :item = 'item',
       :key='index',:dataInfo='item')
+  downloadApp(:state='downloadAppState',@listenFromDownload='listenFromDownload',v-if='downloadAppState')
 </template>
 
 <script>
@@ -23,7 +24,8 @@ import { mapState, mapActions } from 'vuex'
 import global from '@/global'
 import centItem from '@/components/cent-item'
 import request from '@/utils/request'
-import {formatTime3} from '@/utils'
+import {formatTime3,checkScheme} from '@/utils'
+import downloadApp from '@/components/downloadApp'
 import api from './api'
 export default {
   data(){
@@ -35,6 +37,7 @@ export default {
       id:'',
       timeArr:['0','0','0','0'],
       adQueryImg:[],
+      downloadAppState:false
     }
   },
   onShow(){
@@ -46,10 +49,11 @@ export default {
     // this.pageCount = 1;
     //  this.getQuery(14);
     // this.getCurrentDrawFunc();
-    this.adQueryImg =[];
+    // this.adQueryImg =[];
+    this.downloadAppState =false;
   },
   components: {
-    centItem,
+    centItem,downloadApp
   },
   computed: {
     ...mapState([
@@ -88,13 +92,28 @@ export default {
     },
      //广告位
     async getQuery(positionId){
+      this.adQueryImg =[]; 
       const res = await api.get_query(positionId);
       // let wip = JSON.parse(res.value.values[0].data);
       // this.adQueryImg = global.imgUrlPrefix+ wip.img +'@!1200'
       res.value.values.forEach((item,index)=>{
         let wipImg = JSON.parse(item.data).img;
-          this.adQueryImg.push(global.imgUrlPrefix+wipImg+"@!1200")
+        let wipLink = JSON.parse(item.data).link;
+          this.adQueryImg.push({
+            'img':global.imgUrlPrefix+wipImg+"@!1200",
+            'link':wipLink
+          })
       })
+    },
+    checkScheme(link){
+      if(checkScheme(link)){
+          this.downloadAppState =true;
+      }else{
+        return false
+      }
+    },
+    listenFromDownload(msg){
+      this.downloadAppState = msg
     }
   }
 }

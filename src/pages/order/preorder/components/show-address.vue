@@ -5,11 +5,11 @@ a.addressContent(v-if='addressInfo.region',:href='aHref')
         view
             text {{'收货人：'+addressInfo.name}}
             text {{addressInfo.phone}}
-        view {{addressInfo.region+' '+addressInfo.address}}
+        view {{region+' '+addressInfo.address}}
     img(src='/static/assets/arrow_right_16_icon.png')
     img.addressBottom(src='/static/assets/addr@3x.png')
 .addressContent(v-else)
-    .no_address(@tap='add_address')
+    a.no_address(:href='aHref')
         img(src='/static/assets/order_setting_add_unclickale_icon@3x.png')
         text {{'添加收货信息'}}
 </template>
@@ -29,6 +29,19 @@ export default {
       ...mapState(['importAddressState']),
       aHref(){
           return `/pages/order/address`
+      },
+      newAddHref(){
+          return `/pages/order/newAddress`
+      },
+      region(){
+          let wipRegion = '';
+          if(this.addressInfo.region){
+              this.addressInfo.region.split(';').forEach((item,index)=>{
+                wipRegion+=item
+            })
+            return wipRegion
+          }
+          
       }
   },
   mounted () {
@@ -106,6 +119,19 @@ export default {
     >view{
       display: flex;
       justify-content: space-between;
+    }
+    >view:nth-child(1){
+        flex:none;
+        height: 30px;
+    }
+    >view:nth-child(2){
+        flex:1;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
     }
   }
 </style>

@@ -24,6 +24,9 @@ export default {
       default: []
     }
   },
+  onShow(){
+      this.memo = ''
+  },
   methods: {
     changeMemo(){
         this.$emit('listenFromChild',this.memo);
@@ -100,12 +103,15 @@ export default {
             display: flex;
             height: 54px;
             line-height: 54px;
+            align-content: center;
+            justify-content: center;
             text{
                 width: 42px;
             }
             input{
                 flex:1;
-                padding: 14px;
+                padding: 17px;
+                line-height: 54px;
             }
             input:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
                 color: #b2b2b2; opacity:1; 
